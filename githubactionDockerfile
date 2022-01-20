@@ -1,0 +1,30 @@
+FROM jrei/systemd-ubuntu:20.04
+
+# install python and the packages the your code depends on along with jq so we can parse JSON
+# add additional packages as necessary
+RUN DEBIAN_FRONTEND=noninteractive apt-get update -y &&  apt-get install -y --no-install-recommends \
+         curl wget docker.io zip unzip docker.io  sudo ca-certificates
+
+RUN set -x \
+    && wget -O /tmp/intel-sha2-rootchain.zip  http://certificates.intel.com/repository/certificates/IntelSHA2RootChain-Base64.zip \
+    && wget -O  /tmp/intel-rootchain.zip http://certificates.intel.com/repository/certificates/Intel%20Root%20Certificate%20Chain%20Base64.zip \
+    && unzip /tmp/intel-rootchain.zip -d /usr/local/share/ca-certificates/ \
+    && unzip /tmp/intel-sha2-rootchain.zip -d /usr/local/share/ca-certificates/ \
+    && rm /tmp/*.zip \
+    && update-ca-certificates \
+&& adduser --disabled-password -gecos ''  githubrunner \
+     && usermod -aG sudo githubrunner  \
+    && echo "%sudo ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
+        && cd /home/githubrunner/ && mkdir actions-runner \
+       && chmod 777  actions-runner
+
+#USER githubrunner
+#WORKDIR /home/githubrunner/actions-runner
+
+RUN curl -fL https://goto.intel.com/getdt | sh
+RUN    chmod +x dt   \
+&& ./dt install  \
+&& export PATH="/home/githubrunner/bin:$PATH"
+#&& dt github install-runner --no-prompt --name=deap-github-runner.stage-9 --ldap-domain=amr --ldap-username=ajithrax --ldap-password='Sa!ram103' --label='deap,ci-cd'  --location=/home/githubrunner/actions-runner
+~
+
