@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: githubactions
+spec:
+  containers:
+  - name: container
+    image: amr-registry.caas.intel.com/de/githubactions:v2
+    volumeMounts:
+    - mountPath: /tmp
+      name: tmp
+      subPath: tmp
+    - mountPath: /run
+      name: tmp
+      subPath: run
+    - mountPath: /run/lock
+      name: tmp
+      subPath: run-lock
+    - name: dockersock
+      mountPath: "/var/run/docker.sock"
+    - name: cgroup
+      mountPath: "/sys/fs/cgroup"
+  volumes:
+  - name: tmp
+    emptyDir:
+      medium: Memory
+  - name: dockersock
+    hostPath:
+      path: /var/run/docker.sock
+  - name: cgroup
+    hostPath:
+      path: /sys/fs/cgroup
